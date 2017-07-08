@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.main.identification.repository.ExpertRepository">
+
+	<resultMap id="expertMap" type="Expert">
+		<id column="expert_no" property="expertNo"/>
+		<result column="expert_name" property="expertName"/>
+		<result column="profession" property="profession"/>
+		<result column="company_no" property="companyNo"/>
+		<result column="professional_title" property="professionalTitle"/>
+		<result column="remark" property="remark"/>
+
+		<result column="create_by" property="createBy"/>
+		<result column="create_time" property="createTime"/>
+		<result column="last_modify_by" property="lastModifyBy"/>
+		<result column="last_modify_time" property="lastModifyTime"/>
+		<result column="delete_flag" property="deleteFlag"/>
+	</resultMap>
+	
+	<resultMap id="expertInfoMap" extends="expertMap" type="Expert">
+		<result column="company_name" property="companyName"/>
+	</resultMap>	
+	
+	<sql id="searchCondSql">
+  		<if test="expertNo != null and expertNo != '' ">
+  			and t.expert_no = #{expertNo}
+  		</if>
+  		<if test="expertName != null and expertName != '' ">
+  			and t.expert_name like concat('%',#{expertName},'%')
+  		</if>
+  		<if test="profession != null and profession != '' ">
+  			and t.profession like concat('%',#{profession},'%')
+  		</if>
+  		<if test="companyNo != null and companyNo != '' ">
+  			and t.company_no = #{companyNo}
+  		</if>
+  		<if test="professionalTitle != null and professionalTitle != '' ">
+  			and t.professional_title = #{professionalTitle}
+  		</if>
+  		<if test="companyName != null and companyName != '' ">
+  			and c.company_name like concat('%',#{companyName},'%')
+  		</if>
+	</sql>
+	
+  <select id="selectByPK" resultMap="expertMap" parameterType="String">
+		select 
+			   t.EXPERT_NO
+			 , t.EXPERT_NAME
+		     , t.PROFESSION
+		     , t.COMPANY_NO
+		     , t.PROFESSIONAL_TITLE
+		     , t.REMARK
+		     , t.create_by
+		     , t.create_time
+		     , t.last_modify_by
+		     , t.last_modify_time
+		from expert t
+		where t.EXPERT_NO = #{expertNo}
+		  and t.delete_flag = '0'
+  </select>
+  
+    <select id="selectExpert" resultMap="expertMap" parameterType="Expert">
+		select 
+			   t.EXPERT_NO
+			 , t.EXPERT_NAME
+		     , t.PROFESSION
+		     , t.COMPANY_NO
+		     , t.PROFESSIONAL_TITLE
+		     , t.REMARK
+		     , t.create_by
+		     , t.create_time
+		     , t.last_modify_by
+		     , t.last_modify_time
+		from expert t
+		where t.delete_flag = '0'
+        <include refid="searchCondSql" />
+  </select>
+  
+    <select id="selectExpertForApplication" resultMap="expertInfoMap" parameterType="Expert">
+		select 
+			   t.EXPERT_NO
+			 , t.EXPERT_NAME
+		     , t.PROFESSION
+		     , t.COMPANY_NO
+		     , t.PROFESSIONAL_TITLE
+		     , t.REMARK
+		     , t.create_by
+		     , t.create_time
+		     , t.last_modify_by
+		     , t.last_modify_time
+		     , c.company_name
+		from expert t
+		left join company c on t.COMPANY_NO = c.COMPANY_NO 
+		where t.delete_flag = '0'
+        <include refid="searchCondSql" />
+        LIMIT ${startNo}, ${pageSize}
+  </select>
+  
+   <select id="selectExperCountForApplication" resultType="int" parameterType="Expert">
+	select 
+		count(1)
+	from expert t
+	left join company c on t.COMPANY_NO = c.COMPANY_NO 
+	where t.delete_flag = '0'
+       <include refid="searchCondSql" />
+   </select>
+  
+  	<resultMap id="appExpertDetailMap" type="ApplicationDetailExpert">
+		<id column="EXPERT_NO" property="expertNo"/>
+		<result column="EXPERT_NAME" property="expertName"/>
+		<result column="COMPANY_NO" property="companyNo"/>
+		<result column="COMPANY_NAME" property="companyName"/>
+		<result column="role" property="role"/>
+	</resultMap>
+     
+    <select id="searchAppExpertDetail" resultMap="appExpertDetailMap" parameterType="ApplicationDetailComp">
+	   select exp.EXPERT_NO
+	        , exp.EXPERT_NAME
+	        , com.COMPANY_NO
+	        , com.COMPANY_NAME
+	        , '组长' as role
+	     from expert exp
+	left join company com
+	       on com.COMPANY_NO = exp.COMPANY_NO
+		where exp.EXPERT_NO = #{leaderNo}
+		<if test="expertsCon != null and expertsCon != '' ">
+	   union
+	   select exp.EXPERT_NO
+	        , exp.EXPERT_NAME
+	        , com.COMPANY_NO
+	        , com.COMPANY_NAME
+	        , '组员' as role
+	     from expert exp
+	left join company com
+	       on com.COMPANY_NO = exp.COMPANY_NO
+		where exp.EXPERT_NO in (${expertsCon})
+		</if>
+  	</select>
+  	
+   <insert id="insertExpert" parameterType="Expert"  >
+	INSERT INTO Expert
+	 (
+	  `EXPERT_NO`, 
+	  `CREATE_BY`, 
+	  `LAST_MODIFY_BY`, 
+	  `DELETE_FLAG`, 
+	  `EXPERT_NAME`, 
+	  `PROFESSION`,
+	  `COMPANY_NO`,
+	  `PROFESSIONAL_TITLE`,
+	  `REMARK`,
+	  `CREATE_TIME`,
+	  `LAST_MODIFY_TIME`
+	  ) 
+    VALUES(
+    	#{expertNo},
+    	#{createBy},
+    	#{lastModifyBy},
+    	#{deleteFlag},
+    	#{expertName},
+    	#{profession},
+    	#{companyNo},
+    	#{professionalTitle},
+    	#{remark},
+    	now(),
+    	now()
+    )
+  </insert>
+  
+  <update id="delUpdateExpert" parameterType="Expert">
+    UPDATE expert
+    SET  
+       delete_flag = 1,
+       LAST_MODIFY_BY = #{lastModifyBy},
+       LAST_MODIFY_TIME = now()
+    WHERE delete_flag = 0
+      <if test="expertName != null and expertName != ''">  
+        and `EXPERT_NAME` = #{expertName}
+      </if>  
+      <if test="expertNo != null and expertNo != ''">  
+        and `EXPERT_NO` = #{expertNo}
+      </if> 
+  </update>
+  
+  <delete id="deleteReport" parameterType="Report">
+    delete from report
+    WHERE delete_flag = 0
+      <if test="reportNo != null and reportNo != ''">  
+        and `report_no` = #{reportNo}
+      </if>  
+      <if test="remark != null and remark != ''">  
+        and `remark` = #{remark}
+      </if>  
+  </delete>
+  
+  <update id="updateExpert" parameterType="Expert">
+    UPDATE expert
+    SET  
+	  `EXPERT_NAME` = #{expertName}, 
+	  `PROFESSION` = #{profession}, 
+	  `COMPANY_NO` = #{companyNo}, 
+	  `PROFESSIONAL_TITLE` = #{professionalTitle}, 
+	  `REMARK` = #{remark}, 
+       LAST_MODIFY_BY = #{lastModifyBy},
+       LAST_MODIFY_TIME = now()
+    WHERE delete_flag = 0
+        and `EXPERT_NO` = #{expertNo}
+  </update>
+</mapper>

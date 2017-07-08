@@ -10,12 +10,14 @@ public class BaseModel {
 	
 	// DB
 	private int createId;
-	private Date createDate;
+	private Date createTime;
 	private int updateId;
-	private Date updateDate;
+	private Date lastModifyTime;
+	private String createBy;
+	private String lastModifyBy;
+	private String deleteFlag;
 	private String createor;
 	private String updateor;
-	
 
 	public int getPage() {
 		return page;
@@ -49,12 +51,12 @@ public class BaseModel {
 		this.createId = createId;
 	}
 
-	public Date getCreateDate() {
-		return createDate;
+	public Date getCreateTime() {
+		return createTime;
 	}
 
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
 	}
 
 	public int getUpdateId() {
@@ -65,14 +67,42 @@ public class BaseModel {
 		this.updateId = updateId;
 	}
 
-	public Date getUpdateDate() {
-		return updateDate;
+	public Date getLastModifyTime() {
+		return lastModifyTime;
 	}
 
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
+	public void setLastModifyTime(Date lastModifyTime) {
+		this.lastModifyTime = lastModifyTime;
 	}
 
+	public String getCreateBy() {
+		return createBy;
+	}
+
+	public void setCreateBy(String createBy) {
+		this.createBy = createBy;
+	}
+
+	public String getLastModifyBy() {
+		return lastModifyBy;
+	}
+
+	public void setLastModifyBy(String lastModifyBy) {
+		this.lastModifyBy = lastModifyBy;
+	}
+
+	public String getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(String deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public void setDefaultValue(){
+		
+	}
+	
 	public String getCreateor() {
 		return createor;
 	}

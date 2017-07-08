@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.main.identification.repository.ApplicationRepository">
+
+	<resultMap id="applicationMap" type="Application">
+		<id column="application_no" property="applicationNo" />
+		<result column="application_date" property="applicationDate" />
+		<result column="company_no" property="companyNo" />
+		<result column="department" property="department" />
+		<result column="app_file_path" property="appFilePath" />
+		<result column="result_fild_path" property="resultFildPath" />
+		<result column="remark" property="remark" />
+		<result column="delete_flag" property="deleteFlag" />
+
+		<result column="CREATE_BY" property="createBy" />
+		<result column="LAST_MODIFY_BY" property="lastModifyBy" />
+		<result column="CREATE_TIME" property="createTime" />
+		<result column="LAST_MODIFY_TIME" property="lastModifyTime" />
+	</resultMap>
+	
+	<resultMap id="applicationInfoMap" type="ApplicationAddModel">
+		<id column="application_no" property="application.applicationNo" />
+		<result column="application_date" property="application.applicationDate" />
+		<result column="company_no" property="application.companyNo" />
+		<result column="department" property="application.department" />
+		<result column="app_file_path" property="application.appFilePath" />
+		<result column="result_fild_path" property="application.resultFildPath" />	
+		<result column="APP_FILE_NO" property="application.appFileNo" />	
+		<result column="APP_FILE_NAME" property="application.appFileName" />	
+		<result column="RESULT_FILE_NO" property="application.resultFileNo" />	
+		<result column="RESULT_FILE_NAME" property="application.resultFileName" />	
+		<result column="LEADER_NO" property="application.leaderNo" />	
+		<result column="EXPERTS_NO" property="application.expertsNo" />	
+		<result column="COMPANY_NO" property="application.companyNo" />	
+		<result column="COMPANY_NAME" property="application.companyName" />	
+        <collection property="reports" ofType="Report" javaType="ArrayList">  
+			<id column="report_no" property="reportNo"/>
+			<result column="company_no" property="companyNo"/>
+			<result column="equipment_no" property="equipmentNo"/>
+			<result column="repair_level" property="repairLevel"/>
+			<result column="application_no" property="applicationNo"/>
+			<result column="application_date" property="applicationDate"/>
+			<result column="result" property="result"/>
+			<result column="time_limit" property="timeLimit"/>
+			<result column="is_reform" property="isReform"/>
+			<result column="remark" property="remark"/>
+			<result column="equipment_name" property="equipmentName"/>
+        </collection>  		
+	</resultMap>
+
+	<insert id="insertApplication" parameterType="Application"
+		useGeneratedKeys="true" keyProperty="applicationNo">
+		INSERT INTO application(
+		application_no,
+		application_date,
+		company_no,
+		department,
+       `APP_FILE_NAME`,
+	   `APP_FILE_NO`,
+       `LEADER_NO` ,
+       `EXPERTS_NO` ,	  
+	   `RESULT_FILE_NAME` ,
+	   `RESULT_FILE_NO` ,
+	   `ORIGIN_FLAG` ,
+		remark,
+		`DELETE_FLAG`,
+		`CREATE_BY`,
+		`LAST_MODIFY_BY`,
+		`CREATE_TIME`,
+		`LAST_MODIFY_TIME`)
+		VALUES(
+		#{applicationNo},
+		#{applicationDate},
+		#{companyNo},
+		#{department},
+		#{appFileName},
+		#{appFileNo},
+		#{leaderNo},
+		#{expertsNo},
+		#{resultFileName},
+		#{resultFileNo},
+		#{originFlag},
+		#{remark},
+		#{deleteFlag},
+		#{createBy},
+		#{lastModifyBy},
+		now(),
+		now()
+		)
+	</insert>
+	<!-- <update id="deleteApplication" parameterType="Application"> UPDATE 
+		application SET delete_flag = 1, `update_id` = #{updateId}, update_by = #{updateBy}, 
+		update_date = now() WHERE delete_flag = 0 <if test="applicationNo != null 
+		and applicationNo != ''"> and `application_No` = #{applicationNo} </if> <if 
+		test="remark != null and remark != ''"> and `remark` = #{remark} </if> </update> -->
+
+	<resultMap id="applicationResultMap" type="ApplicationResult">
+		<id column="application_no" property="applicationNo" />
+		<result column="application_Date" property="applicationDate" />
+		<result column="application_Date_From" property="applicationDateFrom" />
+		<result column="application_Date_To" property="applicationDateTo" />
+		<result column="report_No" property="reportNo" />
+		<result column="company_No" property="companyNo" />
+		<result column="company_Name" property="companyName" />
+
+		<result column="leader_No" property="leaderNo" />
+		<result column="leader_Name" property="leaderName" />
+
+		<result column="experts_No" property="expertsNo" />
+		<result column="experts_Name" property="expertsName" />
+		<result column="expert_Name_Con" property="expertNameCon" />
+
+		<result column="equipment_No" property="equipmentNo" />
+		<result column="equipment_Name" property="equipmentName" />
+
+		<result column="repair_Level" property="repairLevel" />
+		<result column="result" property="result" />
+		<result column="time_Limit" property="timeLimit" />
+		<result column="is_Reform" property="isReform" />
+		<result column="ORIGIN_FLAG" property="originFlag" />
+		<result column="remark" property="remark" />
+
+		<result column="CREATE_BY" property="createBy" />
+		<result column="LAST_MODIFY_BY" property="lastModifyBy" />
+		<result column="CREATE_TIME" property="createTime" />
+		<result column="LAST_MODIFY_TIME" property="lastModifyTime" />
+	</resultMap>
+
+	<sql id="searchCondSql">
+			<if test="companyName != null and companyName != '' ">
+				and company.company_Name like concat('%',#{companyName},'%')
+			</if>
+			<if test="equipmentName != null and equipmentName != '' ">
+				and equipment.equipment_Name like concat('%',#{equipmentName},'%')
+			</if>
+			<if test="expertsNo != null and expertsNo != '' ">
+				and report.leader_No = #{expertsNo} or report.EXPERTS_NO like
+				#{expertsNo}
+			</if>
+			<if test="applicationDateFrom != null and applicationDateFrom != '' ">
+				and report.application_Date <![CDATA[>=]]>
+				#{applicationDateFrom}
+			</if>
+			<if test="applicationDateTo != null and applicationDateTo != '' ">
+				and report.application_Date <![CDATA[<=]]>
+				#{applicationDateTo}
+			</if>
+			<if test="resultCon != null and resultCon != '' ">
+				and report.result = #{resultCon}
+			</if>
+			<if test="repairLevelCon != null and repairLevelCon != '' ">
+				and report.repair_Level = #{repairLevelCon}
+			</if>
+			<if test="limitDateCon != null and limitDateCon != '' ">
+				and report.time_Limit <![CDATA[<=]]>
+				#{limitDateCon}
+			</if>
+			
+			<if test="expertNameCon != null and expertNameCon != '' ">
+				and ( ${expertNameCon} )
+			</if>
+	</sql>
+
+	<select id="selectApplicationResultCount" resultType="int"
+		parameterType="ApplicationResult">
+		select count(1)
+		from report report
+	   inner join application apply
+		  on apply.APPLICATION_NO = report.APPLICATION_NO
+		 and apply.delete_flag = 0
+	   inner join company
+		  on company.COMPANY_NO = report.COMPANY_NO
+		 and company.delete_flag = 0
+	   inner join equipment
+		  on equipment.EQUIPMENT_NO = report.EQUIPMENT_NO
+		 and equipment.delete_flag = 0
+		WHERE report.delete_flag = 0
+		<include refid="searchCondSql" />
+	</select>
+
+	<select id="selectApplicationResultList" resultMap="applicationResultMap"
+		parameterType="ApplicationResult">
+		select report.APPLICATION_NO
+		, report.APPLICATION_DATE
+		, report.COMPANY_NO
+		, report.LEADER_NO
+		, report.EXPERTS_NO
+		, report.COMPANY_NO
+		, company.COMPANY_NAME
+		, report.EQUIPMENT_NO
+		, equipment.EQUIPMENT_NAME
+		, report.REPAIR_LEVEL
+		, report.REPORT_NO
+		, CASE report.RESULT
+		  WHEN '1' THEN '合格'
+		  WHEN '0' THEN '不合格'
+		  END as result
+		, report.TIME_LIMIT
+		, report.CREATE_BY
+		, report.LAST_MODIFY_BY
+		, report.CREATE_TIME
+		, report.LAST_MODIFY_TIME
+		, apply.ORIGIN_FLAG
+		, report.remark
+		from report report
+		inner join application apply
+		   on apply.APPLICATION_NO = report.APPLICATION_NO
+		  and apply.delete_flag = 0
+		inner join company
+		   on company.COMPANY_NO = report.COMPANY_NO
+		  and company.delete_flag = 0
+		inner join equipment
+		   on equipment.EQUIPMENT_NO = report.EQUIPMENT_NO
+		  and equipment.delete_flag = 0
+		WHERE report.delete_flag = 0
+		<include refid="searchCondSql" />
+		LIMIT ${startNo}, ${pageSize}
+	</select>
+	
+	<delete id="deleteApplication" parameterType="Application">
+		delete from application
+
+		WHERE delete_flag = 0
+		<if test="applicationNo != null and applicationNo != ''">
+			and `application_No` = #{applicationNo}
+		</if>
+		<if test="remark != null and remark != ''">
+			and `remark` = #{remark}
+		</if>
+	</delete>
+
+	<delete id="delUpdateApplication" parameterType="Application">
+		UPDATE application
+		SET delete_flag = 1,
+        	LAST_MODIFY_BY = #{lastModifyBy},
+        	LAST_MODIFY_TIME = now()
+		WHERE delete_flag = 0
+		<if test="applicationNo != null and applicationNo != ''">
+			and `application_No` = #{applicationNo}
+		</if>
+	</delete>
+	
+	<resultMap id="applicationDetailMap" type="ApplicationDetailComp">
+		<result column="APPLICATION_NO" property="applicationNo" />
+		<result column="APPLICATION_DATE" property="applicationDate" />
+		<result column="DEPARTMENT" property="department" />
+		<result column="LEADER_NO" property="leaderNo" />
+		<result column="EXPERTS_NO" property="expertsNo" />
+		
+		<result column="APP_FILE_NAME" property="appFileName" />
+		<result column="APP_FILE_NO" property="appFileNo" />
+		<result column="RESULT_FILE_NAME" property="resultFileName" />
+		<result column="RESULT_FILE_NO" property="resultFileNo" />
+		
+		<result column="COMPANY_NO" property="companyNo" />
+		<result column="COMPANY_NAME" property="companyName" />
+		<result column="COMPANY_CODE" property="companyCode" />
+	</resultMap>
+	
+	<select id="selectCompDetailByApplication" resultMap="applicationDetailMap" parameterType="String">
+		   select app.APPLICATION_NO
+		        , app.APPLICATION_DATE
+		        , app.DEPARTMENT
+		        , app.LEADER_NO
+		        , app.EXPERTS_NO
+		        , app.APP_FILE_NAME
+		        , app.APP_FILE_NO
+		        , app.RESULT_FILE_NAME
+		        , app.RESULT_FILE_NO
+		        , com.COMPANY_NO
+		        , com.COMPANY_NAME
+			    , com.COMPANY_CODE
+		     from Application app
+		left join company com
+		       on com.COMPANY_NO = app.COMPANY_NO
+			where app.application_NO = #{applicationNo}
+	</select>
+	
+	<select id="selectApplicationInfoByNo" resultMap="applicationInfoMap" parameterType="String">
+		   select app.APPLICATION_NO
+		        , app.APPLICATION_DATE
+		        , app.DEPARTMENT
+		        , app.LEADER_NO
+		        , app.EXPERTS_NO
+		        , app.APP_FILE_NAME
+		        , app.APP_FILE_NO
+		        , app.RESULT_FILE_NAME
+		        , app.RESULT_FILE_NO
+                , app.`LEADER_NO` 
+                , app.`EXPERTS_NO` 	        
+		        , com.COMPANY_NO
+		        , com.COMPANY_NAME
+			    , report.report_no, 
+			   report.company_no,
+		       report.equipment_no,
+		       report.repair_level,
+		       report.application_no,
+		       report.application_date,
+		       report.result,
+		       report.time_limit,
+		       report.is_reform,
+		       report.remark,
+		      equipment.equipment_name  	    
+		     from Application app
+		Inner join report on  app.APPLICATION_NO = report.application_no and report.delete_flag = 0
+		Inner join equipment on report.equipment_no = equipment.equipment_no and equipment.delete_flag = 0
+		left join company com on com.COMPANY_NO = app.COMPANY_NO and com.delete_flag = 0
+		   
+		where app.application_NO = #{applicationNo}	
+	</select>
+	
+	<update id="updateApplication"  parameterType="Application">
+		update Application
+		set 
+		application_date = #{applicationDate},
+		company_no= #{companyNo},
+		department= #{department},
+       `APP_FILE_NAME`= #{appFileName},
+	   `APP_FILE_NO`= #{appFileNo},
+       `LEADER_NO` = #{leaderNo},
+       `EXPERTS_NO`  = #{expertsNo},	  
+	   `RESULT_FILE_NAME`  = #{resultFileName},	
+	   `RESULT_FILE_NO`  = #{resultFileNo},	
+	   `ORIGIN_FLAG` = 1,	
+		`LAST_MODIFY_BY` = #{lastModifyBy},	
+		`LAST_MODIFY_TIME`= now()		
+		
+		where application_no = #{applicationNo}
+	</update>
+	
+	<resultMap id="applicationEquipsDetailMap" type="ApplicationDetailEquip">
+		<id column="EQUIPMENT_NO" property="equipmentNo" />
+		<result column="EQUIPMENT_NAME" property="equipmentName" />
+		
+		<result column="groupNo" property="groupNo" />
+		<result column="groupName" property="groupName" />
+		<result column="subGroupNo" property="subGroupNo" />
+		<result column="subGroupName" property="subGroupName" />
+		<result column="department" property="department" />
+		
+		<result column="REPAIR_LEVEL" property="repairLevel" />
+		<result column="RESULT" property="result" />
+		<result column="TIME_LIMIT" property="timeLimit" />
+		<result column="IS_REFORM" property="isReform" />
+		<result column="REMARK" property="remark" />
+	</resultMap>
+	
+	<select id="selectEquipsDetailByApplication" resultMap="applicationEquipsDetailMap"
+		parameterType="String">
+		   select equ.GROUP_NO as groupNo
+		        , (SELECT con.CONSTANT_NAME 
+					 FROM constant con
+					where con.CONSTANT_NO = groupNo) as groupName
+		        , equ.SUB_GROUP_NO as subGroupNo
+		        , (SELECT con.CONSTANT_NAME 
+					 FROM constant con
+					where con.CONSTANT_NO = subGroupNo) as subGroupName
+				, equ.EQUIPMENT_NO
+		        , equ.EQUIPMENT_NAME
+		        , rep.REPAIR_LEVEL
+				, CASE rep.RESULT
+				  WHEN '1' THEN '合格'
+				  WHEN '0' THEN '不合格'
+				  END as RESULT
+				, CASE rep.IS_REFORM
+				  WHEN '1' THEN '整改'
+				  WHEN '0' THEN '不整改'
+				  END as IS_REFORM
+		        , rep.TIME_LIMIT
+		        , rep.REMARK
+		     from report rep
+		left join equipment equ
+		       on rep.EQUIPMENT_NO = equ.EQUIPMENT_NO
+			 where rep.application_NO = #{applicationNo}
+			   and rep.DELETE_FLAG = 0
+	</select>
+	
+</mapper>

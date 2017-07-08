@@ -8,8 +8,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.main.identification.model.BaseModel;
-
 public class AdminUser extends BaseModel implements UserDetails {
 	private static final long serialVersionUID = 5249297571246463032L;
 	private int userId;
@@ -24,6 +22,13 @@ public class AdminUser extends BaseModel implements UserDetails {
 	private String questionCategoryIds;
 	private String questionCategoryNames;
 	private String deleteUserIds;
+	
+	// DB
+	private Date createDate;
+	private Date updateDate;
+	private String createor;
+	private String updateor;
+	
 
 	public int getUserId() {
 		return userId;
@@ -159,5 +164,39 @@ public class AdminUser extends BaseModel implements UserDetails {
 	public void setQuestionCategoryNames(String questionCategoryNames) {
 		this.questionCategoryNames = questionCategoryNames;
 	}
+
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
+
+	public String getCreateor() {
+		return createor;
+	}
+
+	public void setCreateor(String createor) {
+		this.createor = createor;
+	}
+
+	public String getUpdateor() {
+		return updateor;
+	}
+
+	public void setUpdateor(String updateor) {
+		this.updateor = updateor;
+	}
+	
+	
 	
 }

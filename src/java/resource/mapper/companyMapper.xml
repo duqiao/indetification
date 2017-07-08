@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.main.identification.repository.CompanyRepository">
+    <sql id="baseSearchSql">
+        select 
+          COMPANY_NO,
+          CREATE_BY,
+          CREATE_TIME,
+          LAST_MODIFY_BY,
+          LAST_MODIFY_TIME,
+          DELETE_FLAG,
+          COMPANY_NAME,
+          COMPANY_TYPE,
+          COMPANY_CODE,
+          REMARK
+         from COMPANY
+    </sql>
+    
+	<resultMap id="companyMap" type="Company">
+		<id column="company_no" property="companyNo"/>
+		<result column="company_name" property="companyName"/>
+		<result column="company_type" property="companyType"/>
+		<result column="company_code" property="companyCode"/>
+		<result column="remark" property="remark"/>
+
+		<result column="delete_flag" property="deleteFlag"/>
+		
+		<result column="CREATE_BY" property="createBy"/>
+		<result column="LAST_MODIFY_BY" property="lastModifyBy"/>
+		<result column="CREATE_TIME" property="createTime"/>
+		<result column="LAST_MODIFY_TIME" property="lastModifyTime"/>
+	</resultMap>
+
+  <sql id="searchCondSql">
+  	<where>
+  		`DELETE_FLAG` = 0
+  		<if test="companyName != null and companyName != ''">  
+        and `company_Name` like CONCAT('%', #{companyName},'%' )
+      	</if>  
+      	<if test="companyType != null and companyType != ''">  
+        and `company_type` = #{companyType}
+      	</if>
+      	<if test="companyNo != null and companyNo != ''">  
+        and `company_No` = #{companyNo}
+      	</if>
+      	<if test="companyCode != null and companyCode != ''">  
+        and `company_Code` like CONCAT('%', #{companyCode},'%' )
+      	</if>
+      	<if test="remark != null and remark != ''">  
+        and `remark` = #{remark}
+      	</if>
+  	</where>
+  	</sql>
+  	
+  	<select id="selectCompanyResultCount" resultType="int" parameterType="Company">
+	    select count(1)
+		  from company
+		<include refid="searchCondSql"/>  
+  	</select>
+  	
+  	<select id="selectCompanyResultCountForAdd" resultType="int" parameterType="Company">
+	    select count(1)
+		  from company
+		 WHERE delete_flag = 0
+	      <if test="companyName != null and companyName != ''">  
+	        and `company_Name` = #{companyName}
+	      </if>  
+  	</select>
+  	
+  	<select id="selectCompanyResultList" resultMap="companyMap" parameterType="Company">
+   		<include refid="baseSearchSql"/>
+   		<include refid="searchCondSql"/>  
+   		LIMIT ${startNo}, ${pageSize}
+  	</select>
+  	
+  	<select id="selectCompany" resultMap="companyMap" parameterType="Company">
+   		<include refid="baseSearchSql"/>
+   		<include refid="searchCondSql"/>  
+  	</select>
+  	
+  <select id="selectCompanyList" resultMap="companyMap">
+  	<include refid="baseSearchSql"/>
+  	where DELETE_FLAG = '0'
+  	and COMPANY_TYPE = #{companyType}
+  </select>
+	
+  <select id="searchCompanyByName" resultMap="companyMap" parameterType="String">
+    SELECT 
+	   company.company_name,
+	   company.company_type,
+       company.company_code,
+       company.remark,
+	   company.CREATE_TIME,
+	   company.LAST_MODIFY_TIME,
+	   company.create_by,
+	   company.LAST_MODIFY_TIME
+    FROM company company
+    WHERE 
+         company.company_name = #{companyName}    
+  </select>
+  
+  <insert id="insertCompany" parameterType="Company" useGeneratedKeys="true" keyProperty="companyNo" >
+    INSERT INTO company( 
+       company_no,
+	   company_name,
+	   company_type,
+       company_code,
+       remark,
+      `DELETE_FLAG`, 
+	  `CREATE_BY`, 
+	  `LAST_MODIFY_BY`,
+	  `CREATE_TIME`,
+	  `LAST_MODIFY_TIME`) 
+    VALUES(
+        #{companyNo},
+    	#{companyName},
+    	#{companyType},
+    	#{companyCode},
+    	#{remark},
+    	#{deleteFlag},
+    	#{createBy},
+    	#{lastModifyBy},
+    	now(),
+    	now()
+    )
+  </insert>
+  
+  <insert id="insertCompanyBatch" parameterType="java.util.List">
+    INSERT INTO company( 
+       company_no,
+	   company_name,
+	   company_type,
+       company_code,
+       remark,
+       `DELETE_FLAG`,
+	   `CREATE_BY`, 
+	  `LAST_MODIFY_BY`,
+	  `CREATE_TIME`,
+	  `LAST_MODIFY_TIME`) 
+    VALUES
+    <foreach collection="list" item="item" index="index" separator=",">
+    (
+        #{item.companyNo},
+    	#{item.companyName},
+    	#{item.companyType},
+    	#{item.companyCode},
+    	#{item.remark},
+    	#{item.deleteFlag},
+    	#{item.createBy},
+    	#{item.lastModifyBy},
+    	now(),
+    	now()
+    )
+    </foreach>
+  </insert> 
+  
+  <update id="deleteOneCompany" parameterType="Company">
+    UPDATE company
+    SET  
+       delete_flag = 1,
+       LAST_MODIFY_BY = #{lastModifyBy},
+       LAST_MODIFY_TIME = now()
+    WHERE delete_flag = 0
+      <if test="companyName != null and companyName != ''">  
+        and `company_Name` = #{companyName}
+      </if>  
+      <if test="companyNo != null and companyNo != ''">  
+        and `company_No` = #{companyNo}
+      </if>
+      <if test="remark != null and remark != ''">  
+        and `remark` = #{remark}
+      </if>  
+  </update>
+  
+  <delete id="deleteCompany" parameterType="Company">
+    delete from company
+    WHERE delete_flag = 0
+      <if test="companyName != null and companyName != ''">  
+        and `company_Name` = #{companyName}
+      </if>  
+      <if test="companyNo != null and companyNo != ''">  
+        and `company_No` = #{companyNo}
+      </if>
+      <if test="remark != null and remark != ''">  
+        and `remark` = #{remark}
+      </if>  
+  </delete>
+  
+  <update id="updateCompany" parameterType="Company">
+    UPDATE company
+    SET  
+       `company_Name` = #{companyName},
+       `company_Code` = #{companyCode},
+       `remark` = #{remark}
+    WHERE  `company_No` = #{companyNo} 
+       and delete_flag = 0
+  </update>
+</mapper>

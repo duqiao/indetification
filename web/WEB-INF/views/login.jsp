@@ -27,11 +27,10 @@
 </style>
 <c:import url="/WEB-INF/views/common/commonCss.jsp"></c:import>
 </head>
-<body onload='document.loginForm.username.focus();' class="commonBackground">
+<body onload='document.loginForm.username.focus();' style="background:url(/images/7.jpg)no-repeat;background-size:100%">
  <div class="container">
-	<div class="panel panel-default" style="width:443px;margin: 100px auto;">
-	  <div class="panel-heading">请登陆系统111</div>
-	  <div class="panel-body"> 
+	<div  style="width:443px;margin: 100px auto;">
+	  <div> 
 		<c:if test="${not empty error}">
 			<div class="error">${error}</div>
 		</c:if>
@@ -46,7 +45,7 @@
 			<tr>
 				<td>用户名:</td>
 				<td width="20px">&nbsp;</td>
-				<td><input type='text' name='username' value=''></td>
+				<td><input type='text' name='username' value='test'></td>
 			</tr>
 		    <tr>
 				<td>&nbsp;</td>
@@ -56,7 +55,7 @@
 			<tr>
 				<td>密码:</td>
 				<td width="20px">&nbsp;</td>
-				<td><input type='password' name='password' /></td>
+				<td><input type='password' name='password' value="123"/></td>
 			</tr>
 		    <tr>
 				<td>&nbsp;</td>
@@ -65,7 +64,7 @@
 			</tr>			
 			<tr align="right">
 				<td colspan='3'><input name="submit" type="submit"
-					value="登陆" /></td>
+					class="btn btn-primary btn-sm"  value="登陆" /></td>
 			</tr>
 		  </table>
  
@@ -78,4 +77,5 @@
 </div>	
  
 </body>
+
 </html>

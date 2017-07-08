@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.main.identification.repository.ReportRepository">
+
+	<resultMap id="reportMap" type="Report">
+		<id column="report_no" property="reportNo"/>
+		<result column="company_no" property="companyNo"/>
+		<result column="leader_no" property="leaderNo"/>
+		<result column="experts_no" property="expertsNo"/>
+		<result column="equipment_no" property="equipmentNo"/>
+		<result column="repair_level" property="repairLevel"/>
+		<result column="application_no" property="applicationNo"/>
+		<result column="application_date" property="applicationDate"/>
+		<result column="result" property="result"/>
+		<result column="time_limit" property="timeLimit"/>
+		<result column="is_reform" property="isReform"/>
+		<result column="remark" property="remark"/>
+		<result column="delete_flag" property="delectFlag"/>
+
+		<result column="DELETE_FLAG" property="deleteFlag"/>
+		<result column="CREATE_BY" property="createBy"/>
+		<result column="LAST_MODIFY_BY" property="lastModifyBy"/>
+		<result column="CREATE_TIME" property="createTime"/>
+		<result column="LAST_MODIFY_TIME" property="lastModifyTime"/>
+	</resultMap>
+	
+  <insert id="insertReport" parameterType="Report" useGeneratedKeys="true" keyProperty="reportNo" >
+    INSERT INTO report(
+       report_no, 
+	   company_no,
+	   leader_no,
+       experts_no,
+       equipment_no,
+       repair_level,
+       application_no,
+       application_date,
+       result,
+       time_limit,
+       is_reform,
+       remark,
+      `delete_flag`,
+	  `CREATE_BY`, 
+	  `LAST_MODIFY_BY`,
+	  `CREATE_TIME`,
+	  `LAST_MODIFY_TIME`) 
+    VALUES(
+        #{reportNo},
+    	#{companyNo},
+    	#{leaderNo},
+    	#{expertsNo},
+    	#{equipmentNo},
+    	#{repairLevel},
+    	#{applicationNo},
+    	#{applicationDate},
+    	#{result},
+    	#{timeLimit},
+    	#{isReform},
+    	#{remark},
+    	#{deleteFlag},
+    	#{createBy},
+    	#{lastModifyBy},
+    	now(),
+    	now()
+    )
+  </insert> 
+  
+  <insert id="insertReportBatch" parameterType="Report" useGeneratedKeys="true" keyProperty="reportNo" >
+    INSERT INTO report(
+       report_no,  
+	   company_no,
+	   leader_no,
+       experts_no,
+       equipment_no,
+       repair_level,
+       application_no,
+       application_date,
+       result,
+       time_limit,
+       is_reform,
+       remark,
+       `delete_flag`,
+	   `CREATE_BY`, 
+	  `LAST_MODIFY_BY`,
+	  `CREATE_TIME`,
+	  `LAST_MODIFY_TIME`) 
+    VALUES
+    <foreach collection="list" item="item" index="index" separator=",">
+    (
+        #{item.reportNo},
+    	#{item.companyNo},
+    	#{item.leaderNo},
+    	#{item.expertsNo},
+    	#{item.equipmentNo},
+    	#{item.repairLevel},
+    	#{item.applicationNo},
+    	#{item.applicationDate},
+    	#{item.result},
+    	#{item.timeLimit},
+    	#{item.isReform},
+    	#{item.remark},
+    	#{item.deleteFlag},
+    	#{item.createBy},
+    	#{item.lastModifyBy},
+    	now(),
+    	now()
+    )
+    </foreach>
+  </insert> 
+  
+<!--    <update id="deleteReport" parameterType="Report">
+    UPDATE report
+    SET  
+       delete_flag = 1,
+       `update_id` = #{updateId},
+       `update_by` = #{updateBy},
+       update_date = now()
+    WHERE delete_flag = 0
+      <if test="reportNo != null and reportNo != ''">  
+        and `report_no` = #{reportNo}
+      </if>  
+      <if test="remark != null and remark != ''">  
+        and `remark` = #{remark}
+      </if>  
+  </update> -->
+  
+  <update id="removeReport" parameterType="Report">
+      update report
+      set delete_flag = 1
+      where application_no = #{applicationNo}
+  </update>
+  
+  <delete id="deleteReport" parameterType="Report">
+    delete from report
+    WHERE delete_flag = 0
+      <if test="reportNo != null and reportNo != ''">  
+        and `report_no` = #{reportNo}
+      </if>  
+      <if test="remark != null and remark != ''">  
+        and `remark` = #{remark}
+      </if>  
+  </delete>
+  
+  <delete id="delUpdateReport" parameterType="Report">
+    UPDATE report
+    SET delete_flag = 1,
+        LAST_MODIFY_BY = #{lastModifyBy},
+        LAST_MODIFY_TIME = now()
+    where delete_flag = 0
+      <if test="reportNo != null and reportNo != ''">  
+        and `report_no` = #{reportNo}
+      </if>
+      <if test="applicationNo != null and applicationNo != ''"> 
+		and `application_no` = #{applicationNo}
+	  </if>
+  </delete>
+</mapper>

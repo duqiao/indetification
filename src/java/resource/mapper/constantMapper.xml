@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.main.identification.repository.ConstantRepository">
+    <sql id="baseSearchSql">
+          SELECT 
+			CONSTANT_TYPE,
+			CONSTANT_NO,
+			CONSTANT_NAME,
+			PARENT_NO,
+			SORT,
+			ATTRIBUTE_1,
+			ATTRIBUTE_2,
+			ATTRIBUTE_3,
+			DELETE_FLAG,
+			CREATE_BY,
+			CREATE_TIME,
+			LAST_MODIFY_BY,
+			LAST_MODIFY_TIME
+		  FROM constant 
+    </sql>
+    
+	<resultMap id="constantMap" type="ConstantModel">
+		<result column="CONSTANT_TYPE" property="constantType"/>
+		<result column="CONSTANT_NO" property="constantNo"/>
+		<result column="CONSTANT_NAME" property="constantName"/>
+		<result column="PARENT_NO" property="parentNo"/>
+		<result column="SORT" property="sort"/>
+		<result column="ATTRIBUTE_1" property="attribute1"/>
+		<result column="ATTRIBUTE_2" property="attribute2"/>
+		<result column="ATTRIBUTE_3" property="attribute3"/>
+
+		<result column="DELETE_FLAG" property="deleteFlag"/>
+		<result column="CREATE_BY" property="createBy"/>
+		<result column="LAST_MODIFY_BY" property="lastModifyBy"/>
+		<result column="CREATE_TIME" property="createTime"/>
+		<result column="LAST_MODIFY_TIME" property="lastModifyTime"/>
+	</resultMap>
+	
+    <sql id="searchCondSql">
+  	<where>
+  		`DELETE_FLAG` = 0
+  		<if test="constantType != null and constantType != ''">  
+        and `CONSTANT_TYPE` = #{constantType}
+      	</if>  
+      	<if test="constantNo != null and constantNo != ''">  
+        and `CONSTANT_NO` = #{constantNo}
+      	</if>
+      	<if test="constantName != null and constantName != ''">  
+        and `CONSTANT_NAME` like CONCAT('%', #{constantName},'%' )
+      	</if>
+      	<if test="parentNo != null and parentNo != ''">  
+        and `PARENT_NO` = #{parentNo}
+      	</if>
+      	<if test="sort != null and sort != ''">  
+        and `SORT` = #{sort}
+      	</if>
+  	</where>
+  	</sql>
+  
+  <select id="searchConstantCount" resultType="int" parameterType="ConstantModel">
+    select 
+	  count(1)
+    from constant
+	<include refid="searchCondSql"/>  
+  </select>
+  
+  <select id="searchConstantCountForAdd" resultType="int" parameterType="ConstantModel">
+    select 
+	  count(1)
+    from constant
+	<where>
+  		`DELETE_FLAG` = 0
+  		<if test="constantType != null and constantType != ''">  
+        and `CONSTANT_TYPE` = #{constantType}
+      	</if>  
+      	<if test="constantName != null and constantName != ''">  
+        and `CONSTANT_NAME` = #{constantName}
+      	</if>
+  	</where>  
+  </select>
+  
+  <select id="searchConstantList" resultMap="constantMap" parameterType="ConstantModel">
+    SELECT 
+    		CASE c.CONSTANT_TYPE
+		    WHEN 'P_TYPE' THEN '专业'
+		    WHEN 'C_TYPE' THEN '子专业'
+		    WHEN 'REPAIR_LEVEL' THEN '检修级别'
+		    END as CONSTANT_TYPE,
+			c.CONSTANT_TYPE as CONSTANT_TYPE,
+			c.CONSTANT_NO as CONSTANT_NO,
+			c.CONSTANT_NAME as CONSTANT_NAME,
+			c1.CONSTANT_NAME as PARENT_NO,
+			c.SORT as SORT,
+			c.ATTRIBUTE_1 as ATTRIBUTE_1,
+			c.ATTRIBUTE_2 as ATTRIBUTE_2,
+			c.ATTRIBUTE_3 as ATTRIBUTE_3,
+			c.DELETE_FLAG as DELETE_FLAG,
+			c.CREATE_BY as CREATE_BY,
+			c.CREATE_TIME as CREATE_TIME,
+			c.LAST_MODIFY_BY as LAST_MODIFY_BY,
+			c.LAST_MODIFY_TIME as LAST_MODIFY_TIME 
+	FROM constant c
+	LEFT JOIN constant c1
+	ON   c1.CONSTANT_NO = c.PARENT_NO
+	AND  c1.CONSTANT_TYPE = 'P_TYPE'
+	AND  c1.`DELETE_FLAG` = 0
+	<where>
+  		c.`DELETE_FLAG` = 0
+  		<if test="constantType != null and constantType != ''">  
+        and c.`CONSTANT_TYPE` = #{constantType}
+      	</if>  
+      	<if test="constantNo != null and constantNo != ''">  
+        and c.`CONSTANT_NO` = #{constantNo}
+      	</if>
+      	<if test="constantName != null and constantName != ''">  
+        and c.`CONSTANT_NAME` like CONCAT('%', #{constantName},'%' )
+      	</if>
+      	<if test="parentNo != null and parentNo != ''">  
+        and c.`PARENT_NO` = #{parentNo}
+      	</if>
+      	<if test="sort != null and sort != ''">  
+        and c.`SORT` = #{sort}
+      	</if>
+  	</where>
+	order by CONSTANT_TYPE,CONSTANT_NO,SORT
+	LIMIT ${startNo}, ${pageSize}
+  </select>
+  
+  <select id="searchConstant" resultMap="constantMap" parameterType="ConstantModel">
+    <include refid="baseSearchSql"/> 
+	<include refid="searchCondSql"/>
+  </select>
+  
+  <select id="selectConstantList" resultMap="constantMap" parameterType="ConstantModel">
+   	<include refid="baseSearchSql"/>  
+   	 where delete_flag = '0'
+   	  <if test="constantType != null and constantType != ''">  
+     	  and `CONSTANT_TYPE` = #{constantType}      
+      </if>
+       <if test="parentNo != null and parentNo != ''">  
+     	  and `PARENT_NO` = #{parentNo}      
+      </if>
+   	       <!--  and `CONSTANT_TYPE` = #{constantType}       -->  
+   	 order by SORT 
+  </select>
+  
+  <insert id="insertConstant" parameterType="ConstantModel"  >
+    
+	INSERT INTO constant
+	 (
+	  `CONSTANT_TYPE`, 
+	  `CREATE_BY`, 
+	  `LAST_MODIFY_BY`, 
+	  `DELETE_FLAG`, 
+	  `CONSTANT_NO`, 
+	  `CONSTANT_NAME`,
+	  `PARENT_NO`,
+	  `SORT`,
+	  `ATTRIBUTE_1`,
+	  `ATTRIBUTE_2`,
+	  `ATTRIBUTE_3`,
+	  `CREATE_TIME`,
+	  `LAST_MODIFY_TIME`
+	  ) 
+    VALUES(
+    	#{constantType},
+    	#{createBy},
+    	#{lastModifyBy},
+    	#{deleteFlag},
+    	#{constantNo},
+    	#{constantName},
+    	#{parentNo},
+    	#{sort},
+    	#{attribute1},
+    	#{attribute2},
+    	#{attribute3},
+    	now(),
+    	now()
+    )
+  </insert> 
+  
+  
+  <insert id="batchAddConstantModel" parameterType="java.util.List"  >
+    
+	INSERT INTO constant
+	 (
+	  `CONSTANT_TYPE`, 
+	  `CREATE_BY`, 
+	  `LAST_MODIFY_BY`, 
+	  `DELETE_FLAG`, 
+	  `CONSTANT_NO`, 
+	  `CONSTANT_NAME`,
+	  `PARENT_NO`,
+	  `CREATE_TIME`,
+	  `LAST_MODIFY_TIME`
+	  ) 
+    VALUES
+    
+     <foreach collection="list" item="item" index="index" separator=",">
+	   (
+	   	#{item.constantType},
+    	#{item.createBy},
+    	#{item.lastModifyBy},
+    	#{item.deleteFlag},
+    	#{item.constantNo},
+    	#{item.constantName},
+    	#{item.parentNo},
+    	now(),
+    	now()
+	   )
+	 </foreach>
+    	
+    
+  </insert> 
+  
+  
+  <update id="updateConstant" parameterType="ConstantModel">
+    UPDATE admin_user
+    SET  
+       admin_user_name = #{userName},
+       
+      <if test="password != null and password != ''">  
+         `password` = #{password},
+      </if>  
+      role_id = #{roleId},
+      role_name=#{roleName},
+       <if test="questionCategoryIds != null and questionCategoryIds != ''">  
+      question_category_id = #{questionCategoryIds},
+      user.question_category_name=#{questionCategoryNames},
+      </if>
+      `update_id` = #{updateId},
+       updateor = #{updateor},
+       update_date = now()
+    WHERE admin_user_id = #{userId}
+  </update>
+  
+  <update id="updateOneConstant" parameterType="ConstantModel">
+    UPDATE constant
+    SET  
+        `CONSTANT_NAME` = #{constantName},
+        `PARENT_NO` = #{parentNo},
+        `SORT` = #{sort},
+      	`ATTRIBUTE_1` = #{attribute1},
+		`ATTRIBUTE_2` = #{attribute2},
+		`ATTRIBUTE_3` = #{attribute3}
+    WHERE  `CONSTANT_TYPE` = #{constantType} 
+       and `CONSTANT_NO` = #{constantNo}
+       and delete_flag = 0
+  </update>
+  
+  <select id="findParentSeq" resultType="int">
+  	SELECT NEXTVAL('ParentSeq')
+  </select> 
+  
+  <select id="findChildrenSeq" resultType="int">
+ 	 SELECT NEXTVAL('ChildrenSeq')
+  </select> 
+  
+  <select id="findCompanySeq" resultType="int">
+  	SELECT NEXTVAL('CompanySeq')
+  </select> 
+  
+  <select id="findEquipmentSeq" resultType="int">
+ 	 SELECT NEXTVAL('EquipmentSeq')
+  </select> 
+  
+  <select id="findApplicationSeq" resultType="int">
+ 	 SELECT NEXTVAL('ApplicationSeq')
+  </select> 
+  
+  <select id="findReportSeq" resultType="int">
+ 	 SELECT NEXTVAL('ReportSeq')
+  </select> 
+  
+  <select id="findConstantMap" resultMap="constantMap" parameterType="ConstantModel">
+    SELECT CONSTANT_NAME,CONSTANT_NO ,CONSTANT_TYPE FROM constant C
+    where
+    	C.CONSTANT_TYPE = #{constantType}
+  </select>
+  
+  <delete id="deleteConstant" parameterType="ConstantModel">
+    delete from constant
+    WHERE delete_flag = 0
+        and `CONSTANT_TYPE` != 'REPAIR_LEVEL'
+      <if test="constantType != null and constantType != ''">  
+        and `CONSTANT_TYPE` = #{constantType}
+      </if>  
+  </delete>
+  
+  <update id="deleteConstantList" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" separator=";">
+    UPDATE constant
+    SET DELETE_FLAG = 1
+    where
+  		`DELETE_FLAG` = 0
+  		<if test="item.constantType != null and item.constantType != ''">  
+        and `CONSTANT_TYPE` = #{item.constantType}
+      	</if>  
+      	<if test="item.constantNo != null and item.constantNo != ''">  
+        and `CONSTANT_NO` = #{item.constantNo}
+      	</if>
+    </foreach>
+  </update>
+  
+</mapper> 
